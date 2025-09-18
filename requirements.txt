@@ -1,0 +1,5 @@
+numpy<=1.25.0
+scipy>=1.15.1
+matplotlib>=3.10.0
+filterpy>=1.4.5
+ipykernel>=6.29.5
