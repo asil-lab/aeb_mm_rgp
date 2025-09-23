@@ -4,3 +4,4 @@
 *.csv
 *.png
 *.npz
+*.DS_Store
