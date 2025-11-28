@@ -6,7 +6,7 @@ from filterpy.kalman import KalmanFilter, IMMEstimator
 
 ## IMM-CV algorithm
 class IMMCV(IMMEstimator):
-    def __init__(self, q_levels, r, dt):
+    def __init__(self, q_levels, r, dt, dim: int = 2):
         num_modes = len(q_levels)
         no_tran_prob = 0.9
         tran_probs = (1 - no_tran_prob) / (num_modes - 1)
@@ -14,29 +14,33 @@ class IMMCV(IMMEstimator):
             np.eye(num_modes) * (no_tran_prob - tran_probs)
             + np.ones(num_modes) * tran_probs
         )
-        filters: List[KalmanFilter] = [self.cv_kf(dt, q, r) for q in q_levels]
+        filters: List[KalmanFilter] = [self.cv_kf(dt, q, r, dim) for q in q_levels]
         mu = np.full(num_modes, 1.0 / num_modes)
         super().__init__(filters, mu, M)
 
     # constant vel KF template
-    def cv_kf(self, dt: float, q: float, r: float) -> KalmanFilter:
-        kf = KalmanFilter(dim_x=4, dim_z=2)
-        kf.F = np.array(
-            [
-                [1, dt, 0, 0],
-                [0, 1, 0, 0],
-                [0, 0, 1, dt],
-                [0, 0, 0, 1],
-            ]
+    def cv_kf(self, dt: float, q: float, r: float, dim: int) -> KalmanFilter:
+        kf = KalmanFilter(dim_x=2 * dim, dim_z=dim)
+        kf.F = np.kron(
+            np.eye(dim),
+            np.array(
+                [
+                    [1, dt],
+                    [0, 1],
+                ]
+            ),
         )
-        kf.H = np.array(
-            [
-                [1, 0, 0, 0],
-                [0, 0, 1, 0],
-            ]
+        kf.H = np.kron(
+            np.eye(dim),
+            np.array(
+                [
+                    1,
+                    0,
+                ]
+            ),
         )
-        kf.Q = q * np.eye(4)
-        kf.R = np.diag([r, r])
+        kf.Q = q * np.eye(2 * dim)
+        kf.R = r * np.eye(dim)
         kf.P *= 10.0  # large initial uncertainty
         return kf
 
@@ -185,11 +189,11 @@ class RGPMT_ND:
         q_f: float = 1e-1,
         q_th: float = 1e-5,
         jitter: float = 1e-6,
-        num_filters: int = 2,
+        dim: int = 2,
     ) -> None:
-        self.num_filters = num_filters
+        self.dim = dim
         self.filters: List[RGPMT] = []
-        for i in range(num_filters):
+        for i in range(dim):
             self.filters.append(
                 RGPMT(
                     window,
@@ -204,8 +208,8 @@ class RGPMT_ND:
             )
 
     def step(self, z_k: np.ndarray, t_k: float) -> np.ndarray:
-        mu_k = np.zeros(self.num_filters)
-        for i in range(self.num_filters):
+        mu_k = np.zeros(self.dim)
+        for i in range(self.dim):
             mu, var, theta = self.filters[i].step(z_k[i], t_k)
             mu_k[i] = mu
         return mu_k
@@ -228,6 +232,7 @@ class MMRGP(IMMEstimator):
         num_gp_states: int,
         q: float,
         sigma_prior: float,
+        dim: int = 2,
     ):
         self.kernel = kernel
         self.length_scales = length_scales
@@ -235,6 +240,7 @@ class MMRGP(IMMEstimator):
         self.q = q
         self.r = r
         self.sigma_prior = sigma_prior
+        self.dim = dim
 
         self.num_models = len(length_scales)
         no_tran_prob = 0.9
@@ -252,7 +258,8 @@ class MMRGP(IMMEstimator):
         ]
         self.inv_prior_cov = [np.linalg.pinv(c) for c in gp_cov]
         filters = [
-            self.rgp_kf(num_gp_states, gp_cov[n], r, q) for n in range(self.num_models)
+            self.rgp_kf(num_gp_states, gp_cov[n], r, q, dim)
+            for n in range(self.num_models)
         ]
         super().__init__(filters, mu, M)
 
@@ -284,8 +291,8 @@ class MMRGP(IMMEstimator):
                 + self.r
             )
 
-            self.filters[i].H = sp.linalg.block_diag(H, H)
-            self.filters[i].R = sp.linalg.block_diag(R, R)
+            self.filters[i].H = sp.linalg.block_diag(*[H] * self.dim)
+            self.filters[i].R = sp.linalg.block_diag(*[R] * self.dim)
         return super().update(z)
 
     def predicted_mean(self, pred_time):
@@ -301,13 +308,18 @@ class MMRGP(IMMEstimator):
             axis=0,
         )
 
-        return sp.linalg.block_diag(pred_mat, pred_mat) @ self.x_post
+        return sp.linalg.block_diag(*[pred_mat] * self.dim) @ self.x_post
 
     def rgp_kf(
-        self, num_gp_states: int, init_cov: float, r: float, q: float = 1e-3
+        self,
+        num_gp_states: int,
+        init_cov: float,
+        r: float,
+        q: float = 1e-3,
+        dim: int = 2,
     ) -> KalmanFilter:
-        kf = KalmanFilter(dim_x=2 * num_gp_states, dim_z=2)
-        kf.R = np.diag([r, r])
-        kf.Q = q * sp.linalg.block_diag(init_cov, init_cov)
-        kf.P = sp.linalg.block_diag(init_cov, init_cov)
+        kf = KalmanFilter(dim_x=dim * num_gp_states, dim_z=dim)
+        kf.R = r * np.eye(dim)
+        kf.Q = q * sp.linalg.block_diag(*[init_cov] * dim)
+        kf.P = sp.linalg.block_diag(*[init_cov] * dim)
         return kf

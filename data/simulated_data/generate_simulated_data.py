@@ -18,9 +18,11 @@ def generate_simulated_data(
     # Ground truth
     true_x = time * np.cos(time + np.log(time + 1.05) / 5) + 0.011
     true_y = time * np.log(np.sin(time) ** 2 + 2) + 0.01
+    true_z = 3 * np.sqrt(time + 0.01)
 
     meas_x_list = [None] * mc_runs
     meas_y_list = [None] * mc_runs
+    meas_z_list = [None] * mc_runs
     mask_list = [None] * mc_runs
 
     for n in range(mc_runs):
@@ -31,13 +33,16 @@ def generate_simulated_data(
 
         meas_x = true_x + sigma_meas * np.random.randn(t_total)
         meas_y = true_y + sigma_meas * np.random.randn(t_total)
+        meas_z = true_z + sigma_meas * np.random.randn(t_total)
 
         # insert nans where missing.
         meas_x[~mask] = np.nan
         meas_y[~mask] = np.nan
+        meas_z[~mask] = np.nan
 
         meas_x_list[n] = meas_x
         meas_y_list[n] = meas_y
+        meas_z_list[n] = meas_z
         mask_list[n] = mask
 
     # save
@@ -46,8 +51,10 @@ def generate_simulated_data(
         time=time,
         true_x=true_x,
         true_y=true_y,
+        true_z=true_z,
         meas_x=meas_x_list,
         meas_y=meas_y_list,
+        meas_z=meas_z_list,
         mask=mask_list,
     )
 

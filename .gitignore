@@ -5,3 +5,4 @@
 *.png
 *.npz
 *.DS_Store
+**AGZ_subset/
