@@ -41,7 +41,7 @@ class IMMCV(IMMEstimator):
         )
         kf.Q = q * np.eye(2 * dim)
         kf.R = r * np.eye(dim)
-        kf.P *= 10.0  # large initial uncertainty
+        kf.P *= 100.0  # large initial uncertainty
         return kf
 
 
