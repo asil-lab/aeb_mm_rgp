@@ -67,11 +67,11 @@ aeb_mm_rgp/
 
 ## Cite This Paper
 
-If you use this code in your research, please cite the following paper:
+When referencing this work, use the following citation:
 
 ```bibtex
 @ARTICLE{11304544,
-  author={BALCı, ALI EMRE and Rajan, Raj Thilak},
+  author={Balcı, Ali Emre and Rajan, Raj Thilak},
   journal={IEEE Open Journal of Signal Processing}, 
   title={Multiple Model Recursive Gaussian Process for Robust Target Tracking}, 
   year={2026},
