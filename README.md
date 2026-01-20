@@ -5,9 +5,7 @@
 
 ## General Description
 
-This repository contains the code required to replicate the experiments presented in the paper  
-[*Multiple Model Recursive Gaussian Process for Robust Target Tracking*](https://ieeexplore.ieee.org/document/11304544),  
-published in the **IEEE Open Journal of Signal Processing**.
+This repository contains the code required to replicate the experiments presented in the paper [*Multiple Model Recursive Gaussian Process for Robust Target Tracking*](https://ieeexplore.ieee.org/document/11304544), published in the **IEEE Open Journal of Signal Processing**.
 
 ## Requirements
 
@@ -71,7 +69,7 @@ When referencing this work, use the following citation:
 
 ```bibtex
 @ARTICLE{11304544,
-  author={Balcı, Ali Emre and Rajan, Raj Thilak},
+  author={Balc\i, Ali Emre and Rajan, Raj Thilak},
   journal={IEEE Open Journal of Signal Processing}, 
   title={Multiple Model Recursive Gaussian Process for Robust Target Tracking}, 
   year={2026},
