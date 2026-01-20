@@ -1,8 +1,13 @@
-# Multiple Model Recursive Gaussian Process for Robust UAV Tracking
+# Multiple Model Recursive Gaussian Process for Robust Target Tracking
+
+## Paper Title
+**Multiple Model Recursive Gaussian Process for Robust Target Tracking**
 
 ## General Description
 
-This repository contains the code required to replicate the experiments in the paper.
+This repository contains the code required to replicate the experiments presented in the paper  
+[*Multiple Model Recursive Gaussian Process for Robust Target Tracking*](https://ieeexplore.ieee.org/document/11304544),  
+published in the **IEEE Open Journal of Signal Processing**.
 
 ## Requirements
 
@@ -58,3 +63,20 @@ aeb_mm_rgp/
 ├── requirements.txt            # List of Python dependencies
 └── README.md                   # Project documentation
 ```
+
+
+## Cite This Paper
+
+If you use this code in your research, please cite the following paper:
+
+```bibtex
+@ARTICLE{11304544,
+  author={BALCı, ALI EMRE and Rajan, Raj Thilak},
+  journal={IEEE Open Journal of Signal Processing}, 
+  title={Multiple Model Recursive Gaussian Process for Robust Target Tracking}, 
+  year={2026},
+  volume={7},
+  pages={23--31},
+  keywords={Target tracking;Kernel;Radar tracking;Computational modeling;Vehicle dynamics;Tuning;Gaussian processes;Adaptation models;Vectors;Real-time systems;Gaussian process;target tracking;online learning;adaptive filtering},
+  doi={10.1109/OJSP.2025.3646127}
+}
